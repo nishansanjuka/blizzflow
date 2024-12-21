@@ -25,15 +25,33 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: "Nishan/pnpm/store"
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install Frontend Dependencies
         working-directory: frontend
-        run: npm install
+        run: pnpm install
 
       - name: Build Frontend
         working-directory: frontend
-        run: npm run build
+        run: pnpm run build
 
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
