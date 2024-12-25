@@ -1,2 +1,3 @@
 /build/windows
 ginkgo.report
+test.db
