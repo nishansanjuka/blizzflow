@@ -29,7 +29,6 @@ var _ = ginkgo.Describe("Database Connection", func() {
 			}
 			DB = nil
 		}
-		// os.Remove(testDBPath)
 	})
 
 	ginkgo.It("should initialize database successfully", func() {
