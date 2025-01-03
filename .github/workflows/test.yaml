@@ -40,9 +40,7 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Install Wails
-        run: |
-          go get github.com/wailsapp/wails/v3@v3.0.0-alpha.8.3
-          go install github.com/wailsapp/wails/v3/cmd/wails@v3.0.0-alpha.8.3
+        run: github.com/wailsapp/wails/v3
         shell: pwsh
 
       - name: Install Frontend Dependencies
