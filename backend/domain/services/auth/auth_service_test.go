@@ -68,6 +68,11 @@ var _ = ginkgo.Describe("Auth Service", func() {
 		gomega.Expect(user.Username).To(gomega.Equal("testuser"))
 	})
 
+	ginkgo.It("should fail registration with empty credentials", func() {
+		err := authService.Register("", "")
+		gomega.Expect(err).To(gomega.Equal(ErrEmptyCredentials))
+	})
+
 	ginkgo.It("should login user successfully", func() {
 		err := authService.Register("testuser2", "password123")
 		gomega.Expect(err).To(gomega.BeNil())
@@ -82,7 +87,7 @@ var _ = ginkgo.Describe("Auth Service", func() {
 		gomega.Expect(err).To(gomega.BeNil())
 
 		_, err = authService.Login("testuser3", "wrongpassword")
-		gomega.Expect(err).To(gomega.MatchError("invalid credentials"))
+		gomega.Expect(err).To(gomega.Equal(ErrInvalidCredentials))
 	})
 
 	ginkgo.It("should set security questions", func() {
@@ -134,7 +139,7 @@ var _ = ginkgo.Describe("Auth Service", func() {
 		}
 
 		err = authService.RecoverPassword("testuser6", wrongAnswers, "newpassword123")
-		gomega.Expect(err).To(gomega.MatchError("incorrect answer provided"))
+		gomega.Expect(err).To(gomega.Equal(ErrInvalidAnswers))
 	})
 
 })

@@ -30,9 +30,8 @@ func (r *SessionRepository) GetSession(id uint) (*model.Session, error) {
 	return &session, result.Error
 }
 
-func (r *SessionRepository) DeleteSession(id uint) error {
-	result := r.db.Delete(&model.Session{}, id)
-	return result.Error
+func (r *SessionRepository) DeleteSession(sessionID uint) error {
+	return r.db.Delete(&model.Session{}, sessionID).Error
 }
 
 func (r *SessionRepository) GetSessionByUserID(userID uint) (*model.Session, error) {
@@ -42,6 +41,15 @@ func (r *SessionRepository) GetSessionByUserID(userID uint) (*model.Session, err
 		return nil, nil
 	}
 	return &session, result.Error
+}
+
+func (r *SessionRepository) GetSessionByID(sessionID uint) (*model.Session, error) {
+	var session model.Session
+	result := r.db.First(&session, sessionID)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &session, nil
 }
 
 func (r *SessionRepository) CleanupExpiredSessions() error {
