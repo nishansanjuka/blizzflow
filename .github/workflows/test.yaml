@@ -28,17 +28,21 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'frontend/package-lock.json'
 
-      - name: Cache Go modules and Wails
+      - name: Cache Go modules
+        id: go-cache
         uses: actions/cache@v3
         with:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-            ~/go/bin/wails
-          key: ${{ runner.os }}-go-wails-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-wails-
             ${{ runner.os }}-go-
+
+      - name: Install Wails
+        run: |
+          go install github.com/wailsapp/wails/v3/cmd/wails@v3.0.0-alpha.8.3
+        shell: pwsh
 
       - name: Install Frontend Dependencies
         working-directory: frontend
@@ -48,12 +52,8 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-      - name: Install Wails
-        run: go install github.com/wailsapp/wails/v3/cmd/wails@latest
-        if: steps.cache.outputs.cache-hit != 'true'
-
       - name: Run Go Tests
         run: go test -v ./...
 
       - name: Build Wails Application
-        run: wails3 build
+        run: wails build
