@@ -1,2 +1,10 @@
 /build/windows
 ginkgo.report
+test.db
+/build/bin
+/frontend/node_modules
+build/appimage
+build/nfpm
+build/nsis
+/bin
+/frontend/dist
