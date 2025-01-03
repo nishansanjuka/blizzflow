@@ -40,7 +40,7 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Install Wails
-        run: github.com/wailsapp/wails/v3
+        run: go install github.com/wailsapp/wails/v3
         shell: pwsh
 
       - name: Install Frontend Dependencies
