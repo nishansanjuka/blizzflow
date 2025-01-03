@@ -53,7 +53,7 @@ func Migrate() error {
 		&model.User{},
 		&model.Session{},
 		&model.SecurityQuestion{},
-		// Add other models here
+		&model.License{},
 	)
 
 	if err != nil {

@@ -2,6 +2,7 @@ package services
 
 import (
 	auth_service "blizzflow/backend/domain/services/auth"
+	license_service "blizzflow/backend/domain/services/license"
 	session_service "blizzflow/backend/domain/services/session"
 	user_service "blizzflow/backend/domain/services/user"
 )
@@ -20,3 +21,8 @@ var NewSessionService = session_service.NewSessionService
 type UserService = user_service.UserService
 
 var NewUserService = user_service.NewUserService
+
+// Export LicenseService
+type LicenseService = license_service.LicenseService
+
+var NewLicenseService = license_service.NewLicenseService
