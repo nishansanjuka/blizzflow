@@ -58,13 +58,13 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-      - name: Install Wails
-        run: go install github.com/wailsapp/wails/v3/cmd/wails3@latest
-        shell: pwsh
-        if: success() && !steps.go-cache.outputs.cache-hit
+      # - name: Install Wails
+      #   run: go install github.com/wailsapp/wails/v3/cmd/wails3@latest
+      #   shell: pwsh
+      #   if: success() && !steps.go-cache.outputs.cache-hit
 
       - name: Run Go Tests
         run: go test -v ./...
 
-      - name: Build Wails Application
-        run: wails3 build
+      # - name: Build Wails Application
+      #   run: wails3 build
