@@ -60,4 +60,4 @@ jobs:
         run: go test -v ./...
 
       - name: Build Wails Application
-        run: wails build
+        run: wails3 build
