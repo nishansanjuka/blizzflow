@@ -21,43 +21,52 @@ jobs:
         with:
           go-version: "1.22"
 
+      - name: Cache Go modules and tools
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+            ~/go/bin
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
+      - name: Cache build outputs
         uses: actions/cache@v3
         with:
-          path: "Nishan/pnpm/store"
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: |
+            frontend/dist
+            frontend/node_modules
+          key: ${{ runner.os }}-build-${{ hashFiles('frontend/package-lock.json') }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-build-${{ hashFiles('frontend/package-lock.json') }}-
+            ${{ runner.os }}-build-
 
       - name: Install Frontend Dependencies
         working-directory: frontend
-        run: pnpm install
+        run: npm install
 
       - name: Build Frontend
         working-directory: frontend
-        run: pnpm run build
+        run: npm run build
 
       - name: Install Wails
-        run: go install github.com/wailsapp/wails/v3/cmd/wails3@latest
+        run: |
+          go get github.com/wailsapp/wails/v3@v3.0.0-alpha.8.3
+          go install github.com/wailsapp/wails/v3/cmd/wails@v3.0.0-alpha.8.3
+        shell: pwsh
+        if: success() && !steps.go-cache.outputs.cache-hit
 
       - name: Run Go Tests
         run: go test -v ./...
 
       - name: Build Wails Application
-        run: wails3 build
+        run: wails build
