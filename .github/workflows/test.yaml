@@ -25,39 +25,35 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
+      - name: Cache Go modules and Wails
         uses: actions/cache@v3
         with:
-          path: "Nishan/pnpm/store"
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            ~/go/bin/wails
+          key: ${{ runner.os }}-go-wails-${{ hashFiles('**/go.sum') }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-go-wails-
+            ${{ runner.os }}-go-
 
       - name: Install Frontend Dependencies
         working-directory: frontend
-        run: pnpm install
+        run: npm install
 
       - name: Build Frontend
         working-directory: frontend
-        run: pnpm run build
+        run: npm run build
 
       - name: Install Wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+        run: go install github.com/wailsapp/wails/v3/cmd/wails@latest
+        if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Run Go Tests
         run: go test -v ./...
 
       - name: Build Wails Application
-        run: wails build
+        run: wails3 build
