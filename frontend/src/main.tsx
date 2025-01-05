@@ -2,10 +2,11 @@ import React, { FC, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/auth/protected-route";
-import { Home, Login, NotFound } from "./pages";
+import { CallbackPage, Home, Login, NotFound, PurchasePage } from "./pages";
 import { AuthProvider } from "./providers/auth-provider";
 import SignUpPage from "./pages/sign-up";
 import "./globals.css";
+import { Toaster } from "sonner";
 
 const App: FC = () => {
   const [isAuthenticated] = useState<boolean>(false);
@@ -15,8 +16,10 @@ const App: FC = () => {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/sign-in" element={<Login />} />
           <Route path="/sign-up" element={<SignUpPage />} />
+          <Route path="/purchase" element={<PurchasePage />} />
+          <Route path="/callback" element={<CallbackPage />} />
           <Route
             path="/protected"
             element={
@@ -27,6 +30,7 @@ const App: FC = () => {
           />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Toaster richColors />
       </AuthProvider>
     </Router>
   );
