@@ -104,6 +104,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const isSessionValid = await checkSession();
 
+        // Redirect to dashboard if everything is valid
+        if (isSessionValid && license && pathname === "/sign-in") {
+          Window.SetTitle("Blizzflow | Dashboard");
+          Window.SetResizable(true);
+          Window.SetSize(800, 600);
+          navigate("/", { viewTransition: true });
+          return;
+        }
+
+        // Existing authentication logic
         if (
           !isSessionValid &&
           pathname !== "/sign-up" &&
@@ -115,8 +125,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           Window.SetTitle(user ? "Blizzflow | Sign In" : "Blizzflow | Sign Up");
           Window.SetResizable(false);
-
           navigate(user ? "/sign-in" : "/sign-up", { viewTransition: true });
+          Window.SetSize(user ? 400 : 800, 600);
         }
       } catch (error) {
         console.error("Authentication validation failed:", error);
@@ -167,6 +177,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       if (authState.session) {
         await Logout(authState.session.ID);
+        navigate("/callback", { viewTransition: true });
       }
     } finally {
       SessionUtils.clearSession();
@@ -192,7 +203,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   ) => {
     await RecoverPassword(username, answers, newPassword);
   };
-  
+
   const contextValue = useMemo(
     () => ({
       ...authState,

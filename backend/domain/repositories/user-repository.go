@@ -3,6 +3,7 @@ package repository
 import (
 	"blizzflow/backend/domain/model"
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -23,13 +24,20 @@ func (r *UserRepository) CreateUser(user *model.User) error {
 }
 
 func (r *UserRepository) GetUserByUsername(username string) (*model.User, error) {
-	var user model.User
-	if err := r.DB.Where("username = ?", username).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, err
+	if r.DB == nil {
+		return nil, fmt.Errorf("database connection is nil")
 	}
+
+	var user model.User
+	result := r.DB.Where("username = ?", username).First(&user)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
+		}
+		return nil, result.Error
+	}
+
 	return &user, nil
 }
 

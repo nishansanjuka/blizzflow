@@ -3,9 +3,11 @@ package auth_service
 import (
 	"blizzflow/backend/domain/model"
 	repository "blizzflow/backend/domain/repositories"
+	"errors"
 	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 // Custom errors
@@ -64,9 +66,16 @@ func (s *AuthService) Login(username, password string) (*model.Session, error) {
 		return nil, ErrEmptyCredentials
 	}
 
+	if s.userRepo == nil {
+		return nil, fmt.Errorf("user repository is nil")
+	}
+
 	user, err := s.userRepo.GetUserByUsername(username)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user: %w", ErrUserNotFound)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUserNotFound
+		}
+		return nil, fmt.Errorf("failed to get user: %w", ErrDatabaseOperation)
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
@@ -87,7 +96,10 @@ func (s *AuthService) Login(username, password string) (*model.Session, error) {
 func (s *AuthService) SetSecurityQuestions(username string, questions map[string]string) error {
 	user, err := s.userRepo.GetUserByUsername(username)
 	if err != nil {
-		return fmt.Errorf("failed to get user: %w", ErrUserNotFound)
+		if err == gorm.ErrRecordNotFound {
+			return ErrUserNotFound
+		}
+		return fmt.Errorf("failed to get user: %w", ErrDatabaseOperation)
 	}
 
 	// Delete existing questions if any
@@ -117,6 +129,9 @@ func (s *AuthService) SetSecurityQuestions(username string, questions map[string
 func (s *AuthService) verifySecurityAnswers(user *model.User, answers map[string]string) error {
 	var questions []model.SecurityQuestion
 	if err := s.userRepo.DB.Where("user_id = ?", user.ID).Find(&questions).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return ErrSecurityQuestions
+		}
 		return fmt.Errorf("failed to get security questions: %w", ErrDatabaseOperation)
 	}
 
@@ -139,7 +154,10 @@ func (s *AuthService) verifySecurityAnswers(user *model.User, answers map[string
 func (s *AuthService) RecoverPassword(username string, answers map[string]string, newPassword string) error {
 	user, err := s.userRepo.GetUserByUsername(username)
 	if err != nil {
-		return fmt.Errorf("failed to get user: %w", ErrUserNotFound)
+		if err == gorm.ErrRecordNotFound {
+			return ErrUserNotFound
+		}
+		return fmt.Errorf("failed to get user: %w", ErrDatabaseOperation)
 	}
 
 	if err := s.verifySecurityAnswers(user, answers); err != nil {
@@ -163,7 +181,10 @@ func (s *AuthService) Logout(sessionID uint) error {
 	// Check if session exists
 	session, err := s.sessionRepo.GetSessionByID(sessionID)
 	if err != nil {
-		return fmt.Errorf("failed to get session: %w", ErrSessionNotFound)
+		if err == gorm.ErrRecordNotFound {
+			return ErrSessionNotFound
+		}
+		return fmt.Errorf("failed to get session: %w", ErrDatabaseOperation)
 	}
 	if session == nil {
 		return ErrSessionNotFound

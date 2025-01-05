@@ -12,8 +12,7 @@ import { Loader2, Snowflake } from "lucide-react";
 import { toast } from "sonner";
 import { UserService } from "@/blizzflow/backend/domain/services/user";
 import { useAuth } from "@/hooks/use-auth";
-import { Window } from "@wailsio/runtime";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const schema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
