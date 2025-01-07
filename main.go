@@ -7,6 +7,7 @@ import (
 	license_service "blizzflow/backend/domain/services/license"
 	session_service "blizzflow/backend/domain/services/session"
 	user_service "blizzflow/backend/domain/services/user"
+	"blizzflow/backend/infrastructure/database"
 	"embed"
 	"log"
 	"os"
@@ -20,10 +21,25 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
-func main() {
+type ButtonState int
 
-	// Initialize repositories
+const (
+	ButtonEnabled  ButtonState = 0
+	ButtonDisabled ButtonState = 1
+	ButtonHidden   ButtonState = 2
+)
+
+func main() {
+	// get app dir
+	appDir, _ := os.UserConfigDir()
+	homeDir, _ := os.UserHomeDir()
+
 	var db *gorm.DB // Initialize your database connection here
+	db_path := filepath.Join(homeDir, "OneDrive", "Documents", "blizzflow", "data.db")
+	os.MkdirAll(filepath.Dir(db_path), 0755)
+	// Initialize repositories
+	database.InitDB(db_path)
+	db = database.DB
 	userRepo := repository.NewUserRepository(db)
 	sessionRepo := repository.NewSessionRepository(db)
 	securityQuestionsRepo := repository.NewSecurityQuestionRepository(db)
@@ -35,7 +51,7 @@ func main() {
 	licenseService := license_service.NewLicenseService(repository.NewLicenseRepository(db))
 
 	// Initialize license handler
-	appDir, _ := os.UserConfigDir()
+
 	licensePath := filepath.Join(appDir, "blizzflow", "license.blizz")
 	os.MkdirAll(filepath.Dir(licensePath), 0755)
 	licenseHandler := license_handler.NewLicenseHandler(licensePath)
@@ -60,14 +76,14 @@ func main() {
 
 	// Create a new window with the necessary options.
 	app.NewWebviewWindowWithOptions(application.WebviewWindowOptions{
-		Title: "Window 1",
-		Mac: application.MacWindow{
-			InvisibleTitleBarHeight: 50,
-			Backdrop:                application.MacBackdropTranslucent,
-			TitleBar:                application.MacTitleBarHiddenInset,
-		},
-		BackgroundColour: application.NewRGB(27, 38, 54),
-		URL:              "/",
+		Title:               "Blizzflow",
+		URL:                 "/",
+		Width:               800,
+		Height:              600,
+		MinimiseButtonState: application.ButtonHidden,
+		MaximiseButtonState: application.ButtonDisabled,
+		CloseButtonState:    application.ButtonEnabled,
+		// Hidden: true,
 	})
 
 	// Create a goroutine that emits an event containing the current time every second.

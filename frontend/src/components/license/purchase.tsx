@@ -1,23 +1,47 @@
 "use client";
-import { FC, useRef } from "react";
+import { FC, useRef, useState } from "react";
 import { Button } from "../ui/button";
-import { HandCoins } from "lucide-react";
+import { HandCoins, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Input } from "../ui/input";
 import { ValidateLicense } from "@/blizzflow/backend/domain/services/license/licenseservice";
 import { SaveLicense } from "@/blizzflow/backend/domain/handlers/license/licensehandler";
+import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 export const PurchaseSection: FC = () => {
+  const { setLicenseStatus } = useAuth();
+
   const licenseElement = useRef<HTMLInputElement | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   const handlePurchase = async () => {
+    setIsLoading(true);
     try {
       if (licenseElement.current) {
-        const res = await ValidateLicense(licenseElement.current.value);
-        console.log(res);
-        await SaveLicense(licenseElement.current.value);
+        try {
+          toast.loading("Validating license...");
+
+          // Add artificial delay
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          await ValidateLicense(licenseElement.current.value);
+          await SaveLicense(licenseElement.current.value);
+
+          toast.dismiss();
+          toast.success("License purchased successfully");
+          setLicenseStatus(true);
+        } catch (error) {
+          toast.dismiss();
+          toast.error("License validation failed");
+        }
       }
-    } catch (error: any) {
-      console.log(error);
+    } catch (error) {
+      if (typeof error === "string") {
+        toast.error(error);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -33,9 +57,15 @@ export const PurchaseSection: FC = () => {
           className="border-blue-500 placeholder:text-blue-300 focus:ring-blue-400 focus:border-blue-400 text-center focus-visible:ring-blue-400 w-full focus:outline-none"
           placeholder="XXXX-XXXX-XXXX-XXXX"
         />
-        <Button onClick={handlePurchase}>
-          <HandCoins className="size-4" />
-          <span>Purchase</span>
+        <Button disabled={isLoading} onClick={handlePurchase}>
+          {!isLoading ? (
+            <>
+              <HandCoins className="size-4" />
+              <span>Purchase</span>
+            </>
+          ) : (
+            <Loader2 className="animate-spin" />
+          )}
         </Button>
       </div>
     </motion.div>

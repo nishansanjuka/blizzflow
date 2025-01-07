@@ -1,26 +1,10 @@
-"use client";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { PurchaseSection } from "@/components/license/purchase";
 import { Snowflake } from "lucide-react";
-import { PurchaseSection } from "../license/purchase";
+import { FC, useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
-// const securityQuestions = [
-//   "What was the name of your first pet?",
-//   "In what city were you born?",
-//   "What is your mother's maiden name?",
-// ];
-
-export default function Windows11AccountCreation() {
+const PurchasePage: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
-  // const [formData, setFormData] = useState({
-  //   username: "",
-  //   email: "",
-  //   password: "",
-  //   confirmPassword: "",
-  //   securityQuestion: "",
-  //   securityAnswer: "",
-  // });
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -58,6 +42,7 @@ export default function Windows11AccountCreation() {
     );
   }
 
+  //
   return (
     <div className="min-h-screen bg-[#0078D4] flex-col text-white w-full flex items-center justify-center fixed">
       <div>
@@ -69,4 +54,7 @@ export default function Windows11AccountCreation() {
       <PurchaseSection />
     </div>
   );
-}
+};
+
+
+export default PurchasePage;
