@@ -54,6 +54,8 @@ func Migrate() error {
 		&model.Session{},
 		&model.SecurityQuestion{},
 		&model.License{},
+		&model.Inventory{},
+		&model.Sale{},
 	)
 
 	if err != nil {
