@@ -83,7 +83,6 @@ func main() {
 		MinimiseButtonState: application.ButtonHidden,
 		MaximiseButtonState: application.ButtonDisabled,
 		CloseButtonState:    application.ButtonEnabled,
-		// Hidden: true,
 	})
 
 	// Create a goroutine that emits an event containing the current time every second.

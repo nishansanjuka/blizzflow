@@ -7,6 +7,7 @@ import { AuthProvider } from "./providers/auth-provider";
 import SignUpPage from "./pages/sign-up";
 import "./globals.css";
 import { Toaster } from "sonner";
+import Sidebar from "./components/layout/sidebar";
 
 const App: FC = () => {
   const [isAuthenticated] = useState<boolean>(false);
@@ -15,7 +16,14 @@ const App: FC = () => {
     <Router>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={
+              <Sidebar>
+                <Home />
+              </Sidebar>
+            }
+          />
           <Route path="/sign-in" element={<Login />} />
           <Route path="/sign-up" element={<SignUpPage />} />
           <Route path="/purchase" element={<PurchasePage />} />

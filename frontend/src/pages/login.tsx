@@ -7,8 +7,8 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Window } from "@wailsio/runtime";
 import { Input } from "@/components/ui/input";
+import { SetWIndowFullScreen } from "@/lib/utils";
 
 const loginSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -37,9 +37,7 @@ const Login: React.FC = () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await login(data.username, data.password);
       toast.success("Logged in successfully");
-      Window.SetResizable(true);
-      Window.Center();
-      Window.SetSize(800, 600);
+      SetWIndowFullScreen();
       navigate("/");
     } catch (error) {
       if (typeof error === "string") {
@@ -72,12 +70,7 @@ const Login: React.FC = () => {
             >
               Username
             </label>
-            <Input
-              {...register("username")}
-              type="text"
-              id="username"
-              
-            />
+            <Input {...register("username")} type="text" id="username" />
             {errors.username && (
               <p className="mt-1 text-sm text-red-600">
                 {errors.username.message}
@@ -91,12 +84,7 @@ const Login: React.FC = () => {
             >
               Password
             </label>
-            <Input
-              {...register("password")}
-              type="password"
-              id="password"
-              
-            />
+            <Input {...register("password")} type="password" id="password" />
             {errors.password && (
               <p className="mt-1 text-sm text-red-600">
                 {errors.password.message}

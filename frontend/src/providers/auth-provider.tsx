@@ -18,10 +18,14 @@ import {
 } from "@/blizzflow/backend/domain/services/auth/authservice";
 import { LicenseService } from "@/blizzflow/backend/domain/services/license";
 import { LicenseHandler } from "@/blizzflow/backend/domain/handlers/license";
-import { Window } from "@wailsio/runtime";
 import { UserService } from "@/blizzflow/backend/domain/services/user";
 import { SessionUtils } from "@/utils/session.utils";
 import { User, Session } from "@/blizzflow/backend/domain/model";
+import {
+  SetWIndowFullScreen,
+  setWindowPurchaseWindow,
+  setWindowSignUpWindow,
+} from "@/lib/utils";
 interface AuthState {
   isAuthenticated: boolean;
   user: Partial<User> | null;
@@ -86,11 +90,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLicense(isValid);
 
         if (!isValid) {
+          setWindowPurchaseWindow();
           navigate("/purchase", { viewTransition: true });
         }
       } catch (error) {
         console.error("License validation failed:", error);
         setLicense(false);
+        setWindowPurchaseWindow();
         navigate("/purchase", { viewTransition: true });
       }
     };
@@ -105,10 +111,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const isSessionValid = await checkSession();
 
         // Redirect to dashboard if everything is valid
-        if (isSessionValid && license && pathname === "/sign-in") {
-          Window.SetTitle("Blizzflow | Dashboard");
-          Window.SetResizable(true);
-          Window.SetSize(800, 600);
+        if (isSessionValid && license) {
+          SetWIndowFullScreen();
           navigate("/", { viewTransition: true });
           return;
         }
@@ -122,11 +126,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const user = await UserService.GetUserByUsername(
             localStorage.getItem("username") || ""
           );
-
-          Window.SetTitle(user ? "Blizzflow | Sign In" : "Blizzflow | Sign Up");
-          Window.SetResizable(false);
+          setWindowSignUpWindow(user ? true : false);
           navigate(user ? "/sign-in" : "/sign-up", { viewTransition: true });
-          Window.SetSize(user ? 400 : 800, 600);
         }
       } catch (error) {
         console.error("Authentication validation failed:", error);
@@ -176,6 +177,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     try {
       if (authState.session) {
+        await new Promise((resolve) =>
+          setTimeout(() => {
+            resolve("");
+          }, 2000)
+        );
         await Logout(authState.session.ID);
         navigate("/callback", { viewTransition: true });
       }
